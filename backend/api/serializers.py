@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
         max_length=150,
         required=True,
         validators=[
-            RegexValidator(regex='^[\w.@+-]+\Z'),
+            RegexValidator(regex=r'^[\w.@+-]+\Z'),
             UniqueValidator(queryset=User.objects.all())
         ]
     )
@@ -32,14 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
         required=True,
     )
 
-    is_subscribed = serializers.SerializerMethodField(read_only=True)
-
-    def get_is_subscribed(self, obj):
-        """Проверка подписки юзера на автора."""
-        user = self.context.get('request').user.id
-        if user is None:
-            return False
-        return Follow.objects.filter(user=user, following=obj).exists()
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -51,3 +44,10 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'is_subscribed',
         )
+
+    def get_is_subscribed(self, obj):
+        """Проверка подписки юзера на автора."""
+        user = self.context.get('request').user.id
+        if user is None:
+            return False
+        return Follow.objects.filter(user=user, following=obj).exists()
