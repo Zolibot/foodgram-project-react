@@ -10,6 +10,7 @@ __pycache__/
 .http
 .vscode/
 migrations/
+*.sh
 # Distribution / packaging
 .Python
 build/

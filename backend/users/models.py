@@ -8,11 +8,30 @@ class Role(models.TextChoices):
 
 
 class User(AbstractUser):
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+
     email = models.EmailField(
-        'email address',
         max_length=254,
         unique=True,
+        null=False
     )
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        null=False
+    )
+    first_name = models.CharField(
+        max_length=150,
+        blank=False,
+        null=False
+    )
+    last_name = models.CharField(
+        max_length=150,
+        blank=False,
+        null=False
+    )
+
     role = models.CharField(
         max_length=254,
         choices=Role.choices,

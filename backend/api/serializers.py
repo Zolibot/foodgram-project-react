@@ -1,6 +1,4 @@
-from django.core.validators import RegexValidator
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
 from users.models import User, Follow
 
@@ -8,31 +6,7 @@ from users.models import User, Follow
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для user"""
 
-    email = serializers.EmailField(
-        max_length=254,
-        required=True,
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ]
-    )
-    username = serializers.CharField(
-        max_length=150,
-        required=True,
-        validators=[
-            RegexValidator(regex=r'^[\w.@+-]+\Z'),
-            UniqueValidator(queryset=User.objects.all())
-        ]
-    )
-    first_name = serializers.CharField(
-        max_length=150,
-        required=True,
-    )
-    last_name = serializers.CharField(
-        max_length=150,
-        required=True,
-    )
-
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User

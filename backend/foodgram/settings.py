@@ -3,7 +3,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -14,7 +13,6 @@ SECRET_KEY = 'django-insecure-ndjg(_hk=inslg8=mnlf)h=k+x68vzh8-ci4@2nvqt25)7alj9
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -62,7 +60,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
@@ -96,15 +93,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
-
+    'PAGE_SIZE': 6,
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
-
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-    ]
+    ],
 }
 
 
@@ -120,7 +115,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
@@ -140,9 +134,8 @@ AUTH_USER_MODEL = 'users.User'
 # https://djoser.readthedocs.io/en/latest/settings.html
 
 DJOSER = {
-    'LOGIN_FIELD': 'email',
-    'SEND_ACTIVATION_EMAIL': False,
-    'SERIALIZERS': {
-        'current_user': 'api.serializers.UserSerializer',
-    },
+    'USER_ID_FIELD': 'id',
+    'PERMISSIONS': {
+        'user_list': ['rest_framework.permissions.AllowAny'],
+    }
 }
