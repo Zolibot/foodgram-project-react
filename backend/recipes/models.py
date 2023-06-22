@@ -105,6 +105,7 @@ class Recipes(models.Model):
         verbose_name='Ингридиенты',
         help_text='Ингридиенты для рецепта',
         through='IngredientAmount',
+        blank=False,
     )
     cooking_time = models.IntegerField(
         verbose_name='Время',
@@ -128,20 +129,19 @@ class Recipes(models.Model):
 
 
 class IngredientAmount(models.Model):
-
     ingredient = models.ForeignKey(
         Ingredient,
         verbose_name='Ингредиент',
         on_delete=models.CASCADE
     )
-    amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество',
-        help_text='Количество ингредиента',
-    )
     recipe = models.ForeignKey(
         Recipes,
         verbose_name='Рецепт',
         on_delete=models.CASCADE,
+    )
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество',
+        help_text='Количество ингредиента',
     )
 
     class Meta:
