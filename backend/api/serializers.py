@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from users.models import User, Follow
+from recipes.models import Tag, Ingredient, Recipes
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -25,3 +26,30 @@ class UserSerializer(serializers.ModelSerializer):
         if user is None:
             return False
         return Follow.objects.filter(user=user, following=obj).exists()
+
+
+class TagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Tag
+        fields = (
+            'id',
+            'name',
+            'color',
+            'slug',
+        )
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Ingredient
+        fields = (
+            'id',
+            'name',
+            'measurement_unit',
+        )
+
+
+class RecipesSerializer(serializers.ModelSerializer):
+    pass

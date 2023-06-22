@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'users',
+    'recipes',
     'api',
 ]
 
@@ -135,6 +136,7 @@ AUTH_USER_MODEL = 'users.User'
 
 DJOSER = {
     'USER_ID_FIELD': 'id',
+    'HIDE_USERS': False,
     'PERMISSIONS': {
         'user_list': ['rest_framework.permissions.AllowAny'],
     }
