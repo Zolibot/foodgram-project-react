@@ -70,7 +70,6 @@ class IngredientsAmountSerializer(serializers.ModelSerializer):
 
 
 class RecipesSerializer(serializers.ModelSerializer):
-    # TODO Развернуть вложенные поля в модели
 
     tags = TagSerializer(many=True)
     ingredients = IngredientsAmountSerializer(
