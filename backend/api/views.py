@@ -43,3 +43,8 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
+
+
+class RecipesViewSet(ReadOnlyModelViewSet):
+    queryset = Recipes.objects.all()
+    serializer_class = RecipesSerializer
