@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from users.models import User, Follow
-from recipes.models import Tag, Ingredient, Recipes
+from recipes.models import Tag, Ingredient, Recipes, IngredientAmount
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -51,5 +51,41 @@ class IngredientSerializer(serializers.ModelSerializer):
         )
 
 
+class IngredientsAmountSerializer(serializers.ModelSerializer):
+
+    id = serializers.ReadOnlyField(source='ingredient.id')
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit'
+    )
+
+    class Meta:
+        model = IngredientAmount
+        fields = (
+            'id',
+            'name',
+            'measurement_unit',
+            'amount'
+        )
+
+
 class RecipesSerializer(serializers.ModelSerializer):
-    pass
+
+    tags = TagSerializer(many=True)
+    ingredients = IngredientsAmountSerializer(
+        many=True, source='recipe'
+    )
+    author = UserSerializer()
+
+    class Meta:
+        model = Recipes
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'name',
+            'image',
+            'text',
+            'cooking_time',
+        )

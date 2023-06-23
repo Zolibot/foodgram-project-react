@@ -104,6 +104,8 @@ class Recipes(models.Model):
         Ingredient,
         verbose_name='Ингридиенты',
         help_text='Ингридиенты для рецепта',
+        through='IngredientAmount',
+        blank=False,
     )
     cooking_time = models.IntegerField(
         verbose_name='Время',
@@ -124,3 +126,32 @@ class Recipes(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class IngredientAmount(models.Model):
+    ingredient = models.ForeignKey(
+        Ingredient,
+        verbose_name='Ингредиент',
+        related_name='ingredient',
+        on_delete=models.CASCADE
+    )
+    recipe = models.ForeignKey(
+        Recipes,
+        verbose_name='Рецепт',
+        related_name='recipe',
+        on_delete=models.CASCADE,
+    )
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество',
+        help_text='Количество ингредиента',
+    )
+
+    class Meta:
+        verbose_name = 'Количество ингредиентов'
+        verbose_name_plural = 'Количество ингредиентов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique_ingredient',
+            )
+        ]
