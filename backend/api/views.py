@@ -45,6 +45,6 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class RecipesViewSet(ReadOnlyModelViewSet):
+class RecipesViewSet(ModelViewSet):
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer

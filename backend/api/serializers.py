@@ -75,7 +75,7 @@ class RecipesSerializer(serializers.ModelSerializer):
     ingredients = IngredientsAmountSerializer(
         many=True, source='recipe'
     )
-    author = UserSerializer()
+    author = UserSerializer(read_only=True)
 
     class Meta:
         model = Recipes
