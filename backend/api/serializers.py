@@ -76,9 +76,7 @@ class Base64ImageField(serializers.ImageField):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
             ext = format.split('/')[-1]
-
             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
         return super().to_internal_value(data)
 
 
@@ -103,3 +101,59 @@ class RecipesSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         )
+
+
+class IngredientsAmountCreateSerializer(serializers.ModelSerializer):
+
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all()
+    )
+
+    class Meta:
+        model = IngredientAmount
+        fields = (
+            'id',
+            'amount',
+        )
+
+
+class RecipesCreateSerializer(serializers.ModelSerializer):
+
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True
+    )
+    ingredients = IngredientsAmountCreateSerializer(
+        many=True, source='recipe'
+    )
+    author = UserSerializer(read_only=True)
+    image = Base64ImageField(required=True)
+
+    class Meta:
+        model = Recipes
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'name',
+            'image',
+            'text',
+            'cooking_time',
+        )
+
+    def update_or_create_ingredient(self, ingredients, recipe):
+        for ingredient in ingredients:
+            IngredientAmount.objects.update_or_create(
+                ingredient=ingredient['id'],
+                recipe=recipe,
+                amount=ingredient['amount'],
+            )
+
+    def create(self, validated_data):
+        ingredients = validated_data.pop('recipe')
+        user = self.context.get('request').user
+        tags = validated_data.pop('tags')
+        recipe = Recipes.objects.create(author=user, **validated_data)
+        recipe.tags.set(tags)
+        self.update_or_create_ingredient(ingredients, recipe)
+        return recipe

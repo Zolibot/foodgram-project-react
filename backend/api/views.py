@@ -10,8 +10,13 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from users.models import User
 from recipes.models import Ingredient, Recipes, Tag
 
-from .serializers import (IngredientSerializer, RecipesSerializer,
-                          TagSerializer, UserSerializer)
+from .serializers import (
+    IngredientSerializer,
+    RecipesSerializer,
+    TagSerializer,
+    UserSerializer,
+    RecipesCreateSerializer
+)
 
 
 class UserViewSet(UserViewSet):
@@ -45,6 +50,25 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class RecipesViewSet(ModelViewSet):
+class MultiSerializerViewSet(ModelViewSet):
+    serializers = {
+        'default': None,
+    }
+
+    def get_serializer_class(self):
+        print(self.action)
+        print(self.serializers)
+        return self.serializers.get(self.action)
+
+
+class RecipesViewSet(MultiSerializerViewSet):
     queryset = Recipes.objects.all()
-    serializer_class = RecipesSerializer
+    lookup_field = 'id'
+    serializers = {
+        'list': RecipesSerializer,
+        'detail': RecipesSerializer,
+        'retrieve': RecipesSerializer,
+        'create': RecipesCreateSerializer,
+        'update': RecipesCreateSerializer,
+        'partial_update': RecipesCreateSerializer,
+    }
