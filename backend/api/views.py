@@ -2,12 +2,15 @@ from djoser.views import UserViewSet
 
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from rest_framework.pagination import (
+    PageNumberPagination,
+    LimitOffsetPagination
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from users.models import User
+from users.models import User, Follow
 from recipes.models import Ingredient, Recipes, Tag
 from .permissions import IsAuthorOrReadOnly
 
@@ -16,16 +19,14 @@ from .serializers import (
     RecipesSerializer,
     TagSerializer,
     UserSerializer,
-    RecipesCreateSerializer
+    RecipesCreateSerializer,
+    FollowSerializer
 )
 
 
 class UserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # permission_classes = (IsAdminUser,)
-    # filter_backends = (SearchFilter,)
-
     lookup_field = 'id'
     pagination_class = PageNumberPagination
 
@@ -37,6 +38,21 @@ class UserViewSet(UserViewSet):
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=['GET'],
+        permission_classes=(IsAuthenticated,),
+        pagination_class=LimitOffsetPagination
+    )
+    def subscriptions(self, request):
+        user = self.request.user
+        queryset = Follow.objects.filter(user=user)
+        page = self.paginate_queryset(queryset)
+        serializer = FollowSerializer(
+            page, many=True, context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -57,8 +73,6 @@ class MultiSerializerViewSet(ModelViewSet):
     }
 
     def get_serializer_class(self):
-        print(self.action)
-        print(self.serializers)
         return self.serializers.get(self.action)
 
 
