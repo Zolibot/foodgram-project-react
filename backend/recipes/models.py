@@ -148,7 +148,7 @@ class IngredientAmount(models.Model):
         related_name='recipe',
         on_delete=models.CASCADE,
     )
-    amount = models.PositiveSmallIntegerField(
+    amount = models.IntegerField(
         verbose_name='Количество',
         help_text='Количество ингредиента',
         validators=[MinValueValidator(1)]
@@ -165,5 +165,31 @@ class IngredientAmount(models.Model):
             models.constraints.CheckConstraint(
                 check=models.Q(amount__gte=1),
                 name='amount_positive'
+            )
+        ]
+
+
+class FavoriteRecipes(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorite_user',
+        verbose_name='Пользователь'
+    )
+
+    recipe = models.ForeignKey(
+        Recipes,
+        on_delete=models.CASCADE,
+        related_name='favorite_recipes',
+        verbose_name='Рецепты',
+    )
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные рецепты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='favorite_recipe',
             )
         ]

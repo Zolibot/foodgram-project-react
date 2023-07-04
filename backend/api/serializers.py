@@ -192,3 +192,19 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         instance.ingredients.clear()
         self.update_or_create_ingredient(ingredients, instance)
         return super().update(instance, validated_data)
+
+
+class FavoriteSerializer(serializers.HyperlinkedModelSerializer):
+
+    image = Base64ImageField(read_only=True)
+    name = serializers.ReadOnlyField()
+    cooking_time = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Recipes
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        )
