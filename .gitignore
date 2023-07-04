@@ -12,6 +12,9 @@ __pycache__/
 migrations/
 *.sh
 food/
+*.bak
+test.*
+*.http
 # Distribution / packaging
 .Python
 build/

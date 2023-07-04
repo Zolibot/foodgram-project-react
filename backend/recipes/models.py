@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator
 from users.models import User
 
 
@@ -77,7 +77,7 @@ class Recipes(models.Model):
     name = models.CharField(
         verbose_name='Название',
         help_text='Название рецепта',
-        max_length=250,
+        max_length=200,
         null=False,
         blank=False,
         db_index=True,
@@ -112,6 +112,7 @@ class Recipes(models.Model):
         help_text='Время приготовления в минутах',
         null=False,
         blank=False,
+        validators=[MinValueValidator(1)]
     )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации рецепта',
@@ -123,6 +124,12 @@ class Recipes(models.Model):
         ordering = ['-pub_date']
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+        constraints = [
+            models.constraints.CheckConstraint(
+                check=models.Q(cooking_time__gte=1),
+                name='cooking_time_positive'
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -141,9 +148,10 @@ class IngredientAmount(models.Model):
         related_name='recipe',
         on_delete=models.CASCADE,
     )
-    amount = models.PositiveSmallIntegerField(
+    amount = models.IntegerField(
         verbose_name='Количество',
         help_text='Количество ингредиента',
+        validators=[MinValueValidator(1)]
     )
 
     class Meta:
@@ -153,5 +161,35 @@ class IngredientAmount(models.Model):
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
                 name='unique_ingredient',
+            ),
+            models.constraints.CheckConstraint(
+                check=models.Q(amount__gte=1),
+                name='amount_positive'
+            )
+        ]
+
+
+class FavoriteRecipes(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorite_user',
+        verbose_name='Пользователь'
+    )
+
+    recipe = models.ForeignKey(
+        Recipes,
+        on_delete=models.CASCADE,
+        related_name='favorite_recipes',
+        verbose_name='Рецепты',
+    )
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные рецепты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='favorite_recipe',
             )
         ]
