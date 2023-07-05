@@ -55,6 +55,46 @@ class UserViewSet(UserViewSet):
             page, many=True, context={'request': request})
         return self.get_paginated_response(serializer.data)
 
+    @action(
+        detail=True,
+        methods=['POST', 'DELETE'],
+        permission_classes=(IsAuthenticated,),
+        pagination_class=None,
+    )
+    def subscribe(self, request, **kwargs):
+        user = self.request.user
+        author = get_object_or_404(User, id=kwargs['id'])
+        if request.method == 'POST':
+            if Follow.objects.filter(user=user, following=author).exists():
+                return Response(
+                    {'errors': 'Вы уже подписаны на данного автора.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if user == author:
+                return Response(
+                    {'errors': 'Невозможно подписаться на самого себя.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = FollowSerializer(
+                Follow.objects.create(user=user, following=author),
+                context={'request': request},
+            )
+
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED
+            )
+        if not Follow.objects.filter(user=user, following=author).exists():
+            return Response(
+                {'errors': 'Вы не были подписаны на автора.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        Follow.objects.filter(user=user, following=author).delete()
+        return Response(
+            'Вы успешно отписались от автора.',
+            status=status.HTTP_204_NO_CONTENT
+        )
+
 
 class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
