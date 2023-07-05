@@ -38,6 +38,8 @@ class FollowSerializer(serializers.ModelSerializer):
     first_name = serializers.ReadOnlyField(source='following.first_name')
     last_name = serializers.ReadOnlyField(source='following.last_name')
     is_subscribed = serializers.SerializerMethodField()
+    recipe = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -48,7 +50,21 @@ class FollowSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'is_subscribed',
+            'recipe',
+            'recipes_count',
         )
+
+    def get_recipes_count(self, obj):
+        return Recipes.objects.filter(author=obj.following).count()
+
+    def get_recipe(self, obj):
+        request = self.context.get('request')
+        queryset = Recipes.objects.filter(author=obj.following)
+        if 'recipes_limit' in request.query_params:
+            queryset = queryset[:int(request.query_params['recipes_limit'])]
+        serializer = FavoriteSerializer(
+            queryset, many=True, context={'request': request})
+        return serializer.data
 
     def get_is_subscribed(self, obj):
         """Проверка подписки юзера на автора."""
