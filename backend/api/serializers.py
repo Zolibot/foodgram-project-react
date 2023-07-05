@@ -39,6 +39,7 @@ class FollowSerializer(serializers.ModelSerializer):
     last_name = serializers.ReadOnlyField(source='following.last_name')
     is_subscribed = serializers.SerializerMethodField()
     recipe = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -50,7 +51,11 @@ class FollowSerializer(serializers.ModelSerializer):
             'last_name',
             'is_subscribed',
             'recipe',
+            'recipes_count',
         )
+
+    def get_recipes_count(self, obj):
+        return Recipes.objects.filter(author=obj.following).count()
 
     def get_recipe(self, obj):
         request = self.context.get('request')
