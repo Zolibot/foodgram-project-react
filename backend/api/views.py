@@ -1,29 +1,38 @@
-from djoser.views import UserViewSet
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404
+from djoser.views import UserViewSet
 
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import (
-    PageNumberPagination,
-    LimitOffsetPagination
+    LimitOffsetPagination,
+    PageNumberPagination
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from users.models import User, Follow
-from recipes.models import Ingredient, Recipes, Tag, FavoriteRecipes
-from .permissions import IsAuthorOrReadOnly
+from recipes.models import (
+    FavoriteRecipes,
+    Ingredient,
+    Recipes,
+    ShoppingCart,
+    Tag,
+    IngredientAmount,
+)
+from users.models import Follow, User
 
+from .permissions import IsAuthorOrReadOnly
 from .serializers import (
+    FavoriteSerializer,
+    FollowSerializer,
     IngredientSerializer,
+    RecipesCreateSerializer,
     RecipesSerializer,
     TagSerializer,
-    UserSerializer,
-    RecipesCreateSerializer,
-    FollowSerializer,
-    FavoriteSerializer,
+    UserSerializer
 )
+from .utils import get_shopping_ingredient
 
 
 class UserViewSet(UserViewSet):
@@ -164,3 +173,58 @@ class RecipesViewSet(MultiSerializerViewSet):
                     {'errors': 'Рецепт уже удален'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
+    @action(
+        detail=True,
+        methods=['POST', 'DELETE'],
+        permission_classes=(IsAuthenticated,),
+    )
+    def shopping_cart(self, request, **kwargs):
+        recipe = get_object_or_404(Recipes, pk=kwargs['id'])
+        user = self.request.user
+        if request.method == 'POST':
+            serializer = FavoriteSerializer(
+                recipe, context={'request': request})
+            if ShoppingCart.objects.filter(
+                user=user, recipe=recipe
+            ).exists():
+                return Response(
+                    {'errors': 'Рецепт уже есть в списке покупок'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            else:
+                ShoppingCart.objects.create(user=user, recipe=recipe)
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED)
+        elif request.method == 'DELETE':
+            if ShoppingCart.objects.filter(
+                user=user, recipe=recipe
+            ).exists():
+                ShoppingCart.objects.get(user=user, recipe=recipe).delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(
+                    {'errors': 'Рецепт уже удален'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+    @action(
+        detail=False,
+        methods=['GET'],
+        permission_classes=(IsAuthenticated,),
+        pagination_class=None,
+    )
+    def download_shopping_cart(self, request, **kwargs):
+        if not ShoppingCart.objects.filter(user=self.request.user).exists():
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        ingredients = IngredientAmount.objects.filter(
+            recipe__shopping_recipes__user=self.request.user
+        ).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(
+            amount_sum=Sum('amount')
+        ).order_by('ingredient__name')
+
+        return get_shopping_ingredient(ingredients)
