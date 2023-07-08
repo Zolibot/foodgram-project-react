@@ -1,5 +1,6 @@
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 
 from rest_framework import status
@@ -15,13 +16,13 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from recipes.models import (
     FavoriteRecipes,
     Ingredient,
+    IngredientAmount,
     Recipes,
     ShoppingCart,
     Tag,
-    IngredientAmount,
 )
 from users.models import Follow, User
-
+from .filter import RecipeFilter
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     FavoriteSerializer,
@@ -30,7 +31,7 @@ from .serializers import (
     RecipesCreateSerializer,
     RecipesSerializer,
     TagSerializer,
-    UserSerializer
+    UserSerializer,
 )
 from .utils import get_shopping_ingredient
 
@@ -116,6 +117,14 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     pagination_class = None
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        name = self.request.query_params.get('name', None)
+        if name:
+            name = name.lower()
+            queryset = queryset.filter(name__startswith=name)
+        return queryset
+
 
 class MultiSerializerViewSet(ModelViewSet):
     serializers = {
@@ -131,6 +140,8 @@ class RecipesViewSet(MultiSerializerViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = LimitOffsetPagination
     lookup_field = 'id'
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = RecipeFilter
     serializers = {
         'list': RecipesSerializer,
         'detail': RecipesSerializer,

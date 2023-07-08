@@ -31,10 +31,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         """Проверка подписки юзера на автора."""
-        user = self.context.get('request').user.id
-        if user is None:
+
+        user = self.context.get('request').user
+        if user.is_anonymous:
             return False
-        return Follow.objects.filter(user=user, following=obj.pk).exists()
+        return Follow.objects.filter(user=user, following=obj).exists()
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -156,12 +157,18 @@ class RecipesSerializer(serializers.ModelSerializer):
         )
 
     def get_is_favorited(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
         return FavoriteRecipes.objects.filter(
-            user=self.context.get('request').user, recipe=obj).exists()
+            user=user, recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
         return ShoppingCart.objects.filter(
-            user=self.context.get('request').user, recipe=obj).exists()
+            user=user, recipe=obj).exists()
 
 
 class IngredientsAmountCreateSerializer(serializers.ModelSerializer):
