@@ -3,7 +3,14 @@ from django.core.files.base import ContentFile
 import base64
 
 from users.models import User, Follow
-from recipes.models import Tag, Ingredient, Recipes, IngredientAmount
+from recipes.models import (
+    Tag,
+    Ingredient,
+    Recipes,
+    IngredientAmount,
+    FavoriteRecipes,
+    ShoppingCart
+)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,10 +31,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         """Проверка подписки юзера на автора."""
-        user = self.context.get('request').user.id
-        if user is None:
+
+        user = self.context.get('request').user
+        if user.is_anonymous:
             return False
-        return Follow.objects.filter(user=user, following=obj.pk).exists()
+        return Follow.objects.filter(user=user, following=obj).exists()
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -130,6 +138,8 @@ class RecipesSerializer(serializers.ModelSerializer):
     )
     author = UserSerializer(read_only=True)
     image = Base64ImageField(required=True)
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipes
@@ -138,11 +148,27 @@ class RecipesSerializer(serializers.ModelSerializer):
             'tags',
             'author',
             'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
             'name',
             'image',
             'text',
             'cooking_time',
         )
+
+    def get_is_favorited(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return FavoriteRecipes.objects.filter(
+            user=user, recipe=obj).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return ShoppingCart.objects.filter(
+            user=user, recipe=obj).exists()
 
 
 class IngredientsAmountCreateSerializer(serializers.ModelSerializer):
