@@ -1,7 +1,7 @@
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from djoser.views import UserViewSet
+from djoser.views import UserViewSet, TokenCreateView
 
 from rest_framework import status
 from rest_framework.decorators import action
@@ -34,6 +34,14 @@ from .serializers import (
     UserSerializer,
 )
 from .utils import get_shopping_ingredient
+
+
+class CustomTokenCreateView(TokenCreateView):
+
+    def _action(self, serializer):
+        response = super()._action(serializer)
+        response.status_code = status.HTTP_201_CREATED
+        return response
 
 
 class UserViewSet(UserViewSet):
