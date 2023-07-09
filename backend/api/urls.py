@@ -6,6 +6,7 @@ from .views import (
     TagViewSet,
     IngredientViewSet,
     RecipesViewSet,
+    CustomTokenCreateView
 )
 
 
@@ -15,8 +16,8 @@ router.register(r'tags', TagViewSet, basename='tags')
 router.register(r'ingredients', IngredientViewSet, basename='ingredients')
 router.register(r'recipes', RecipesViewSet, basename='recipes')
 
-
 urlpatterns = [
     path('', include(router.urls)),
+    path('auth/token/login/', CustomTokenCreateView.as_view(), name='login'),
     path('auth/', include('djoser.urls.authtoken')),
 ]
