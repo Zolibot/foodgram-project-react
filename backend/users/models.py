@@ -19,7 +19,8 @@ class User(AbstractUser):
     username = models.CharField(
         max_length=150,
         unique=True,
-        null=False
+        null=False,
+        verbose_name='Пользователь',
     )
     first_name = models.CharField(
         max_length=150,
@@ -48,6 +49,8 @@ class User(AbstractUser):
     @property
     def is_admin(self):
         return self.role == Role.ADMIN or self.is_superuser
+
+    is_admin.fget.short_description = 'Админ'
 
 
 class Follow(models.Model):

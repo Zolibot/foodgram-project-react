@@ -7,7 +7,7 @@ from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
-    help = 'Загрузка ингридиентов из json'
+    help = 'Загрузка ингридиентов из "../data/ingredients.json"'
 
     def handle(self, *args, **options):
         file_path = Path('../data/ingredients.json')
