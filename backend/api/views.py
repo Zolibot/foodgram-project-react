@@ -49,6 +49,7 @@ class UserViewSet(UserViewSet):
     serializer_class = UserSerializer
     lookup_field = 'id'
     pagination_class = PageNumberPagination
+    pagination_class.page_size_query_param = 'limit'
 
     @action(
         detail=False,
@@ -63,7 +64,6 @@ class UserViewSet(UserViewSet):
         detail=False,
         methods=['GET'],
         permission_classes=(IsAuthenticated,),
-        pagination_class=LimitOffsetPagination,
     )
     def subscriptions(self, request):
         user = self.request.user
@@ -146,7 +146,8 @@ class MultiSerializerViewSet(ModelViewSet):
 class RecipesViewSet(MultiSerializerViewSet):
     queryset = Recipes.objects.all()
     permission_classes = (IsAuthorOrReadOnly,)
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
+    pagination_class.page_size_query_param = 'limit'
     lookup_field = 'id'
     filter_backends = (DjangoFilterBackend, )
     filterset_class = RecipeFilter
