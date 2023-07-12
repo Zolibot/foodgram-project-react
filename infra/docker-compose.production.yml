@@ -12,9 +12,7 @@ services:
       - pg_data:/var/lib/postgresql/data
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: greger20/foodgram_backend
     env_file: ../.env
     depends_on:
       - db
@@ -23,9 +21,7 @@ services:
       - media:/app/media/
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: greger20/foodgram_frontend
     volumes:
       - ../frontend/:/app/result_build/
 

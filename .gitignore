@@ -15,6 +15,7 @@ food/
 *.bak
 *.toml
 *.http
+node_modules/
 # Distribution / packaging
 .Python
 build/
