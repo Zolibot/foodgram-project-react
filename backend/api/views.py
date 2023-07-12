@@ -5,10 +5,7 @@ from djoser.views import UserViewSet, TokenCreateView
 
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.pagination import (
-    LimitOffsetPagination,
-    PageNumberPagination
-)
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -49,6 +46,7 @@ class UserViewSet(UserViewSet):
     serializer_class = UserSerializer
     lookup_field = 'id'
     pagination_class = PageNumberPagination
+    pagination_class.page_size_query_param = 'limit'
 
     @action(
         detail=False,
@@ -63,7 +61,7 @@ class UserViewSet(UserViewSet):
         detail=False,
         methods=['GET'],
         permission_classes=(IsAuthenticated,),
-        pagination_class=LimitOffsetPagination,
+        pagination_class=pagination_class,
     )
     def subscriptions(self, request):
         user = self.request.user
@@ -146,7 +144,8 @@ class MultiSerializerViewSet(ModelViewSet):
 class RecipesViewSet(MultiSerializerViewSet):
     queryset = Recipes.objects.all()
     permission_classes = (IsAuthorOrReadOnly,)
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
+    pagination_class.page_size_query_param = 'limit'
     lookup_field = 'id'
     filter_backends = (DjangoFilterBackend, )
     filterset_class = RecipeFilter
