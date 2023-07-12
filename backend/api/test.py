@@ -1,8 +1,16 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from recipes.models import Tag, Recipes, IngredientAmount, Ingredient
+from recipes.models import Tag, Ingredient
 from rest_framework import status
 from rest_framework.test import APIClient
+
+# ______ _____ _   _ _____   _   _______ _____  _   __
+# |  _  \  _  | \ | |_   _| | | / /_   _/  __ \| | / /
+# | | | | | | |  \| | | |   | |/ /  | | | /  \/| |/ /
+# | | | | | | | . ` | | |   |    \  | | | |    |    \
+# | |/ /\ \_/ / |\  | | |   | |\  \_| |_| \__/\| |\  \
+# |___/  \___/\_| \_/ \_/   \_| \_/\___/ \____/\_| \_/
+# with PostgreSQL not passing
 
 
 class FoodgramAPITestCase(TestCase):
@@ -312,6 +320,11 @@ class FoodgramAPITestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_ingidients(self):
+        ingredient = Ingredient.objects.create(
+            name='трава',
+            measurement_unit='кг',
+        )
+        ingredient.save()
         response = self.client.get('/api/ingredients/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

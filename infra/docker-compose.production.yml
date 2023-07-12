@@ -22,11 +22,15 @@ services:
 
   frontend:
     image: greger20/foodgram_frontend
+    depends_on:
+      - backend
     volumes:
       - ../frontend/:/app/result_build/
 
   nginx:
     image: nginx:1.19.3
+    depends_on:
+      - backend
     ports:
       - "80:80"
     volumes:
