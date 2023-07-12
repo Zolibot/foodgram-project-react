@@ -61,7 +61,6 @@ class UserViewSet(UserViewSet):
         detail=False,
         methods=['GET'],
         permission_classes=(IsAuthenticated,),
-        pagination_class=pagination_class,
     )
     def subscriptions(self, request):
         user = self.request.user

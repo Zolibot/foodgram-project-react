@@ -22,6 +22,11 @@ class FoodgramAPITestCase(TestCase):
             last_name='sadasd2',
             password='Qwerty123123',
         )
+        ingredient = Ingredient.objects.create(
+            name='трава',
+            measurement_unit='кг',
+        )
+        ingredient.save()
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
         self.non_client = APIClient()
@@ -85,7 +90,7 @@ class FoodgramAPITestCase(TestCase):
 
         response = self.client.get('/api/users/1/')
         self.assertEqual(
-            response.status_code, status.HTTP_200_OK, 'Есть доступ'
+            response.status_code, status.HTTP_200_OK, 'Нет доступа'
         )
 
         response = self.client.get('/api/users/5/')
@@ -307,11 +312,6 @@ class FoodgramAPITestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_ingidients(self):
-        ingredient = Ingredient.objects.create(
-            name='трава',
-            measurement_unit='кг',
-        )
-        ingredient.save()
         response = self.client.get('/api/ingredients/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
