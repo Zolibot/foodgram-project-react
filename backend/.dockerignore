@@ -1,0 +1,12 @@
+venv/
+.git
+__pycache__/
+*.pyc
+db.sqlite3
+.env
+migrations/
+*/temp*
+*/*/temp*
+temp?
+*.sqlite3
+.env

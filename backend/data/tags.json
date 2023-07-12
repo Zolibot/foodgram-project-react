@@ -1,0 +1,52 @@
+[
+  {
+    "name": "рецепт",
+    "color": "#FFC300",
+    "slug": "recipe"
+  },
+  {
+    "name": "еда",
+    "color": "#FF5733",
+    "slug": "food"
+  },
+  {
+    "name": "кулинария",
+    "color": "#C70039",
+    "slug": "culinary"
+  },
+  {
+    "name": "повар",
+    "color": "#900C3F",
+    "slug": "chef"
+  },
+  {
+    "name": "вкусно",
+    "color": "#581845",
+    "slug": "delicious"
+  },
+  {
+    "name": "готовимдома",
+    "color": "#FFA726",
+    "slug": "cookathome"
+  },
+  {
+    "name": "легкиерецепты",
+    "color": "#FF5733",
+    "slug": "easyrecipes"
+  },
+  {
+    "name": "здоровое",
+    "color": "#8BC34A",
+    "slug": "healthy"
+  },
+  {
+    "name": "десерт",
+    "color": "#FF4081",
+    "slug": "dessert"
+  },
+  {
+    "name": "праздник",
+    "color": "#FF0000",
+    "slug": "celebration"
+  }
+]
