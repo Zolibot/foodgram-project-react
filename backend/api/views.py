@@ -163,9 +163,7 @@ class RecipesViewSet(MultiSerializerViewSet):
         recipe = get_object_or_404(Recipes, pk=kwargs['id'])
         user = self.request.user
         if request.method == 'POST':
-            serializer = FavoriteSerializer(
-                recipe, context={'request': request}
-            )
+            serializer = FavoriteSerializer(recipe)
             if FavoriteRecipes.objects.filter(
                 user=user, recipe=recipe
             ).exists():
@@ -195,9 +193,7 @@ class RecipesViewSet(MultiSerializerViewSet):
         recipe = get_object_or_404(Recipes, pk=kwargs['id'])
         user = self.request.user
         if request.method == 'POST':
-            serializer = FavoriteSerializer(
-                recipe, context={'request': request}
-            )
+            serializer = FavoriteSerializer(recipe)
             if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
                 return Response(
                     {'errors': 'Рецепт уже есть в списке покупок'},
