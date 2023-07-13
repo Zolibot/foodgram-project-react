@@ -1,5 +1,7 @@
 # **praktikum_new_diplom**
 
+![githab](https://raw.githubusercontent.com/Zolibot/Interview_of_a_real_fighter/main/food.gif)
+
 ![](https://img.shields.io/badge/license-MIT-green)
 ![](https://img.shields.io/badge/Powered%20by-Python3.9-green)
 
@@ -10,8 +12,8 @@
 - [**praktikum\_new\_diplom**](#praktikum_new_diplom)
   - [**Оглавление**](#оглавление)
     - [**Проект Foodgram**](#проект-foodgram)
-      - [**Описание функциональности**](#описание-функциональности)
-        - [Основные функции сайта включают:](#основные-функции-сайта-включают)
+    - [**Описание функциональности**](#описание-функциональности)
+        - [**Основные функции сайта включают:**](#основные-функции-сайта-включают)
       - [**Технологии:**](#технологии)
     - [**Запуск проекта через Docker compose**](#запуск-проекта-через-docker-compose)
       - [**Настройка файла окружения .env**](#настройка-файла-окружения-env)
@@ -19,7 +21,7 @@
       - [**Запуск**](#запуск)
     - [**Настройка CI/CD используя GitHab Action**](#настройка-cicd-используя-githab-action)
       - [**Список переменных:**](#список-переменных)
-  - [**Документация API**](#документация-api)
+  - [**Для проверки вход в Админ панель**](#для-проверки-вход-в-админ-панель)
   - [**Авторы**](#авторы)
 
 ---
@@ -28,11 +30,11 @@
 
 Проект "Рецепты онлайн" - это веб-приложение, разработанное на основе` Django REST framework` с использованием `gunicorn` для взаимодействия `Django` и `Nginx`. В проекте также используется `PostgreSQL` для хранения данных, а сам проект развертывается в `Docker` контейнерах.
 
-#### **Описание функциональности**
+### **Описание функциональности**
 
 Сайт представляет собой платформу, где пользователи могут публиковать свои рецепты блюд, подписываться на авторов публикаций, создавать список избранных рецептов и добавлять рецепты в список покупок. Пользователи могут также скачивать список ингредиентов для покупок и использовать его при походе в магазин.
 
-##### Основные функции сайта включают:
+##### **Основные функции сайта включают:**
 
 - Регистрацию и аутентификацию пользователей
 - Создание, редактирование и удаление рецептов
@@ -46,8 +48,8 @@
 
 - ![](https://img.shields.io/badge/Python-3.9-brightgreen)
 - ![](https://img.shields.io/badge/Django-3.2-brightgreen)
-- ![](https://img.shields.io/badge/Nginx-1.18.0-brightgreen)
-- ![](https://img.shields.io/badge/NodeJs-v18.16.0-brightgreen)
+- ![](https://img.shields.io/badge/Nginx-1.19.3-brightgreen)
+- ![](https://img.shields.io/badge/NodeJs-13.12.0-brightgreen)
 - ![](https://img.shields.io/badge/Gunicorn-20.1.0-brightgreen)
 - ![](https://img.shields.io/badge/Docker-24.0.2-brightgreen)
 - ![](https://img.shields.io/badge/PostgreSQL-13.10-brightgreen)
@@ -208,9 +210,21 @@ DEBUG=True
 
 ---
 
-## **Документация API**
+## **Для проверки вход в Админ панель**
 
-Документация `API` проекта доступна по адресу `http://your.domain.name.org/api/docs`.
+- [адрес](https://floodapocalypse.zapto.org) Админ панели
+```
+https://floodapocalypse.zapto.org/admin/
+```
+
+- Email
+```
+d.banana@fruitmail.com
+```
+- Password
+```
+murdermuffin
+```
 
 ## **Авторы**
 
