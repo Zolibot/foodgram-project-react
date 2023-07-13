@@ -1,8 +1,7 @@
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from djoser.views import UserViewSet, TokenCreateView
-
+from djoser.views import TokenCreateView, UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -10,6 +9,18 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
+from api.filter import RecipeFilter
+from api.permissions import IsAuthorOrReadOnly
+from api.serializers import (
+    FavoriteSerializer,
+    FollowSerializer,
+    IngredientSerializer,
+    RecipesCreateSerializer,
+    RecipesSerializer,
+    TagSerializer,
+    UserSerializer,
+)
+from api.utils import get_shopping_ingredient
 from recipes.models import (
     FavoriteRecipes,
     Ingredient,
@@ -19,22 +30,9 @@ from recipes.models import (
     Tag,
 )
 from users.models import Follow, User
-from .filter import RecipeFilter
-from .permissions import IsAuthorOrReadOnly
-from .serializers import (
-    FavoriteSerializer,
-    FollowSerializer,
-    IngredientSerializer,
-    RecipesCreateSerializer,
-    RecipesSerializer,
-    TagSerializer,
-    UserSerializer,
-)
-from .utils import get_shopping_ingredient
 
 
 class CustomTokenCreateView(TokenCreateView):
-
     def _action(self, serializer):
         response = super()._action(serializer)
         response.status_code = status.HTTP_201_CREATED
@@ -67,7 +65,8 @@ class UserViewSet(UserViewSet):
         queryset = Follow.objects.filter(user=user)
         page = self.paginate_queryset(queryset)
         serializer = FollowSerializer(
-            page, many=True, context={'request': request})
+            page, many=True, context={'request': request}
+        )
         return self.get_paginated_response(serializer.data)
 
     @action(
@@ -83,12 +82,12 @@ class UserViewSet(UserViewSet):
             if Follow.objects.filter(user=user, following=author).exists():
                 return Response(
                     {'errors': 'Вы уже подписаны на данного автора.'},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
             if user == author:
                 return Response(
                     {'errors': 'Невозможно подписаться на самого себя.'},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
             serializer = FollowSerializer(
@@ -96,18 +95,16 @@ class UserViewSet(UserViewSet):
                 context={'request': request},
             )
 
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED
-            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         if not Follow.objects.filter(user=user, following=author).exists():
             return Response(
                 {'errors': 'Вы не были подписаны на автора.'},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
         Follow.objects.filter(user=user, following=author).delete()
         return Response(
             'Вы успешно отписались от автора.',
-            status=status.HTTP_204_NO_CONTENT
+            status=status.HTTP_204_NO_CONTENT,
         )
 
 
@@ -146,7 +143,7 @@ class RecipesViewSet(MultiSerializerViewSet):
     pagination_class = PageNumberPagination
     pagination_class.page_size_query_param = 'limit'
     lookup_field = 'id'
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     serializers = {
         'list': RecipesSerializer,
@@ -167,7 +164,8 @@ class RecipesViewSet(MultiSerializerViewSet):
         user = self.request.user
         if request.method == 'POST':
             serializer = FavoriteSerializer(
-                recipe, context={'request': request})
+                recipe, context={'request': request}
+            )
             if FavoriteRecipes.objects.filter(
                 user=user, recipe=recipe
             ).exists():
@@ -175,21 +173,18 @@ class RecipesViewSet(MultiSerializerViewSet):
                     {'errors': 'Рецепт уже есть в избранном'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            else:
-                FavoriteRecipes.objects.create(user=user, recipe=recipe)
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED)
-        elif request.method == 'DELETE':
+            FavoriteRecipes.objects.create(user=user, recipe=recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
             if FavoriteRecipes.objects.filter(
                 user=user, recipe=recipe
             ).exists():
                 FavoriteRecipes.objects.get(user=user, recipe=recipe).delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
-            else:
-                return Response(
-                    {'errors': 'Рецепт уже удален'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            return Response(
+                {'errors': 'Рецепт уже удален'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     @action(
         detail=True,
@@ -201,29 +196,23 @@ class RecipesViewSet(MultiSerializerViewSet):
         user = self.request.user
         if request.method == 'POST':
             serializer = FavoriteSerializer(
-                recipe, context={'request': request})
-            if ShoppingCart.objects.filter(
-                user=user, recipe=recipe
-            ).exists():
+                recipe, context={'request': request}
+            )
+            if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
                 return Response(
                     {'errors': 'Рецепт уже есть в списке покупок'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            else:
-                ShoppingCart.objects.create(user=user, recipe=recipe)
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED)
-        elif request.method == 'DELETE':
-            if ShoppingCart.objects.filter(
-                user=user, recipe=recipe
-            ).exists():
+            ShoppingCart.objects.create(user=user, recipe=recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
                 ShoppingCart.objects.get(user=user, recipe=recipe).delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
-            else:
-                return Response(
-                    {'errors': 'Рецепт уже удален'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            return Response(
+                {'errors': 'Рецепт уже удален'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     @action(
         detail=False,
@@ -235,13 +224,13 @@ class RecipesViewSet(MultiSerializerViewSet):
         if not ShoppingCart.objects.filter(user=self.request.user).exists():
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        ingredients = IngredientAmount.objects.filter(
-            recipe__shopping_recipes__user=self.request.user
-        ).values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
-        ).annotate(
-            amount_sum=Sum('amount')
-        ).order_by('ingredient__name')
+        ingredients = (
+            IngredientAmount.objects.filter(
+                recipe__shopping_recipes__user=self.request.user
+            )
+            .values('ingredient__name', 'ingredient__measurement_unit')
+            .annotate(amount_sum=Sum('amount'))
+            .order_by('ingredient__name')
+        )
 
         return get_shopping_ingredient(ingredients)

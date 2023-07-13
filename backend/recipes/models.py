@@ -1,10 +1,10 @@
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
-from django.core.validators import RegexValidator, MinValueValidator
+
 from users.models import User
 
 
 class Ingredient(models.Model):
-
     name = models.CharField(
         verbose_name='Ингридиент',
         help_text='Наименование ингридиента',
@@ -27,7 +27,6 @@ class Ingredient(models.Model):
 
 
 class Tag(models.Model):
-
     name = models.CharField(
         verbose_name='Тег',
         help_text='Наименование тега',
@@ -38,22 +37,14 @@ class Tag(models.Model):
         verbose_name='Цвет',
         help_text='Цвет в НЕХ формате',
         max_length=8,
-        validators=[
-            RegexValidator(
-                regex=r'^#(?:[0-9a-fA-F]{3}){1,2}$'
-            )
-        ],
+        validators=[RegexValidator(regex=r'^#(?:[0-9a-fA-F]{3}){1,2}$')],
     )
     slug = models.SlugField(
         'Slug',
         max_length=100,
         unique=True,
         db_index=True,
-        validators=[
-            RegexValidator(
-                regex=r'^[-a-zA-Z0-9_]+$'
-            )
-        ],
+        validators=[RegexValidator(regex=r'^[-a-zA-Z0-9_]+$')],
     )
 
     class Meta:
@@ -112,7 +103,7 @@ class Recipes(models.Model):
         help_text='Время приготовления в минутах',
         null=False,
         blank=False,
-        validators=[MinValueValidator(1)]
+        validators=[MinValueValidator(1)],
     )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации рецепта',
@@ -127,7 +118,7 @@ class Recipes(models.Model):
         constraints = [
             models.constraints.CheckConstraint(
                 check=models.Q(cooking_time__gte=1),
-                name='cooking_time_positive'
+                name='cooking_time_positive',
             )
         ]
 
@@ -140,7 +131,7 @@ class IngredientAmount(models.Model):
         Ingredient,
         verbose_name='Ингредиент',
         related_name='ingredient',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
     recipe = models.ForeignKey(
         Recipes,
@@ -151,7 +142,7 @@ class IngredientAmount(models.Model):
     amount = models.IntegerField(
         verbose_name='Количество',
         help_text='Количество ингредиента',
-        validators=[MinValueValidator(1)]
+        validators=[MinValueValidator(1)],
     )
 
     class Meta:
@@ -163,9 +154,8 @@ class IngredientAmount(models.Model):
                 name='unique_ingredient',
             ),
             models.constraints.CheckConstraint(
-                check=models.Q(amount__gte=1),
-                name='amount_positive'
-            )
+                check=models.Q(amount__gte=1), name='amount_positive'
+            ),
         ]
 
 
@@ -174,7 +164,7 @@ class FavoriteRecipes(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='favorite_user',
-        verbose_name='Пользователь'
+        verbose_name='Пользователь',
     )
 
     recipe = models.ForeignKey(
@@ -200,7 +190,7 @@ class ShoppingCart(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='shopping_user',
-        verbose_name='Пользователь'
+        verbose_name='Пользователь',
     )
 
     recipe = models.ForeignKey(

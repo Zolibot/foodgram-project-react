@@ -4,10 +4,10 @@ from recipes.models import Recipes
 
 
 class RecipeFilter(FilterSet):
-    is_favorited = BooleanFilter(
-        field_name='is_favorited', method='favorited')
+    is_favorited = BooleanFilter(field_name='is_favorited', method='favorited')
     is_in_shopping_cart = BooleanFilter(
-        field_name='is_in_shopping_cart', method='in_shopping_cart')
+        field_name='is_in_shopping_cart', method='in_shopping_cart'
+    )
     tags = CharFilter(field_name='tags__slug', method='filter_tags')
 
     def filter_tags(self, queryset, name, value):

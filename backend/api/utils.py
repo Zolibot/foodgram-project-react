@@ -6,12 +6,14 @@ def get_shopping_ingredient(ingredients):
     head = ["No.", "Наименование", "Количество", "Ед.изм."]
     data = []
     for count, ingredient in enumerate(ingredients, start=1):
-        data.append([
-            str(count),
-            ingredient['ingredient__name'],
-            str(ingredient['amount_sum']),
-            ingredient['ingredient__measurement_unit'],
-        ])
+        data.append(
+            [
+                str(count),
+                ingredient['ingredient__name'],
+                str(ingredient['amount_sum']),
+                ingredient['ingredient__measurement_unit'],
+            ]
+        )
 
     table = tabulate(data, headers=head, tablefmt="github")
     return FileResponse(

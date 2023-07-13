@@ -11,27 +11,15 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
-    email = models.EmailField(
-        max_length=254,
-        unique=True,
-        null=False
-    )
+    email = models.EmailField(max_length=254, unique=True, null=False)
     username = models.CharField(
         max_length=150,
         unique=True,
         null=False,
         verbose_name='Пользователь',
     )
-    first_name = models.CharField(
-        max_length=150,
-        blank=False,
-        null=False
-    )
-    last_name = models.CharField(
-        max_length=150,
-        blank=False,
-        null=False
-    )
+    first_name = models.CharField(max_length=150, blank=False, null=False)
+    last_name = models.CharField(max_length=150, blank=False, null=False)
 
     role = models.CharField(
         max_length=254,
@@ -64,7 +52,7 @@ class Follow(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='following',
-        verbose_name='Автор'
+        verbose_name='Автор',
     )
 
     class Meta:
