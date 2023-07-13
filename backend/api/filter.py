@@ -1,6 +1,10 @@
 from django_filters.rest_framework import FilterSet
-from django_filters.rest_framework.filters import BooleanFilter, CharFilter
-from recipes.models import Recipes
+from django_filters.rest_framework.filters import (
+    BooleanFilter,
+    ModelMultipleChoiceFilter,
+)
+
+from recipes.models import Recipes, Tag
 
 
 class RecipeFilter(FilterSet):
@@ -8,11 +12,11 @@ class RecipeFilter(FilterSet):
     is_in_shopping_cart = BooleanFilter(
         field_name='is_in_shopping_cart', method='in_shopping_cart'
     )
-    tags = CharFilter(field_name='tags__slug', method='filter_tags')
-
-    def filter_tags(self, queryset, name, value):
-        tags = value.split(',')
-        return queryset.filter(tags__slug__in=tags)
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__slug',
+        to_field_name='slug',
+        queryset=Tag.objects.all(),
+    )
 
     def favorited(self, queryset, name, value):
         user = self.request.user
