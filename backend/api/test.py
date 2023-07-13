@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from recipes.models import Tag, Ingredient
+from recipes.models import Ingredient, Tag
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -15,15 +15,15 @@ from rest_framework.test import APIClient
 
 class FoodgramAPITestCase(TestCase):
     def setUp(self):
-        User = get_user_model()
-        self.user = User.objects.create_user(
+        user = get_user_model()
+        self.user = user.objects.create_user(
             username='auth_user',
             email='ururu@utu.ru',
             first_name='Alex',
             last_name='sadasd',
             password='Qwerty123123',
         )
-        self.user2 = User.objects.create_user(
+        self.user2 = user.objects.create_user(
             username='auth_user2',
             email='ururu2@utu.ru',
             first_name='Alex2',
@@ -193,7 +193,9 @@ class FoodgramAPITestCase(TestCase):
         data_recipe = {
             "ingredients": [{"id": 1, "amount": 10}],
             "tags": [],
-            "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
+            "image": """data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABA
+            gMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4b
+            AAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==""",
             "name": "string",
             "text": "string",
             "cooking_time": 1,
@@ -241,7 +243,9 @@ class FoodgramAPITestCase(TestCase):
         data_recipe = {
             "ingredients": [{"id": 1, "amount": 10}],
             "tags": [],
-            "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
+            "image": """data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABA
+            gMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4b
+            AAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==""",
             "name": "stringqweqwe",
             "cooking_time": 1,
         }
@@ -264,7 +268,9 @@ class FoodgramAPITestCase(TestCase):
         data_recipe = {
             "ingredients": [{"id": 1, "amount": 10}],
             "tags": [],
-            "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
+            "image": """data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABA
+            gMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4b
+            AAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==""",
             "name": "stringqweqwe",
             "cooking_time": 0,
         }
