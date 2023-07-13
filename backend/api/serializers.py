@@ -2,7 +2,6 @@ import base64
 
 from django.core.files.base import ContentFile
 from rest_framework.serializers import (
-    HyperlinkedModelSerializer,
     ImageField,
     ModelSerializer,
     PrimaryKeyRelatedField,
@@ -221,7 +220,7 @@ class RecipesCreateSerializer(ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class FavoriteSerializer(HyperlinkedModelSerializer):
+class FavoriteSerializer(ModelSerializer):
     image = Base64ImageField(read_only=True)
     name = ReadOnlyField()
     cooking_time = ReadOnlyField()
