@@ -7,16 +7,16 @@ from rest_framework.serializers import (
     PrimaryKeyRelatedField,
     ReadOnlyField,
     SerializerMethodField,
+    ValidationError,
 )
+
 from recipes.models import (
-    FavoriteRecipes,
     Ingredient,
     IngredientAmount,
     Recipes,
-    ShoppingCart,
     Tag,
 )
-from users.models import User, Follow
+from users.models import Follow, User
 
 
 class UserSerializer(ModelSerializer):
@@ -56,7 +56,7 @@ class FollowSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = (
+        fields = [
             'email',
             'id',
             'username',
@@ -65,14 +65,26 @@ class FollowSerializer(ModelSerializer):
             'is_subscribed',
             'recipes',
             'recipes_count',
-        )
+        ]
+
+    def validate(self, data):
+        author = self.context.get('author')
+        user = self.context.get('request').user
+
+        if user.follower.filter(following=author).first():
+            raise ValidationError('Вы уже подписаны на данного автора.')
+        if user == author:
+            raise ValidationError('Невозможно подписаться на самого себя.')
+        return data
 
     def get_recipes_count(self, obj):
-        return Recipes.objects.filter(author=obj.following).count()
+        return Recipes.objects.filter(
+            author=self.context.get('author')
+        ).count()
 
     def get_recipes(self, obj):
         request = self.context.get('request')
-        queryset = Recipes.objects.filter(author=obj.following)
+        queryset = Recipes.objects.filter(author=self.context.get('author'))
         if 'recipes_limit' in request.query_params:
             queryset = queryset[: int(request.query_params['recipes_limit'])]
         serializer = FavoriteSerializer(
@@ -83,7 +95,7 @@ class FollowSerializer(ModelSerializer):
     def get_is_subscribed(self, obj):
         """Проверка подписки юзера на автора."""
         return Follow.objects.filter(
-            user=obj.user, following=obj.following
+            user=self.context.get('user'), following=self.context.get('author')
         ).exists()
 
 
@@ -154,13 +166,13 @@ class RecipesSerializer(ModelSerializer):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return FavoriteRecipes.objects.filter(user=user, recipe=obj).exists()
+        return user.favorite_user.filter(recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return ShoppingCart.objects.filter(user=user, recipe=obj).exists()
+        return user.shopping_user.filter(recipe=obj).exists()
 
 
 class IngredientsAmountCreateSerializer(ModelSerializer):
@@ -194,12 +206,16 @@ class RecipesCreateSerializer(ModelSerializer):
         )
 
     def update_or_create_ingredient(self, ingredients, recipe):
+        temp_instances = []
         for ingredient in ingredients:
-            IngredientAmount.objects.update_or_create(
-                ingredient=ingredient['id'],
-                recipe=recipe,
-                amount=ingredient['amount'],
+            temp_instances.append(
+                IngredientAmount(
+                    ingredient=ingredient['id'],
+                    recipe=recipe,
+                    amount=ingredient['amount'],
+                )
             )
+        IngredientAmount.objects.bulk_create(temp_instances)
 
     def create(self, validated_data):
         ingredients = validated_data.pop('recipe')
@@ -233,3 +249,15 @@ class FavoriteSerializer(ModelSerializer):
             'image',
             'cooking_time',
         )
+
+    def validate(self, attrs):
+        request = self.context.get('request')
+        user = self.initial_data.get('user')
+        recipe = self.initial_data.get('recipe')
+        if request.parser_context['view'].action == 'favorite':
+            if user.favorite_user.filter(recipe=recipe).first():
+                raise ValidationError('Рецепт уже есть в избранном')
+        if request.parser_context['view'].action == 'shopping_cart':
+            if user.shopping_user.filter(recipe=recipe).first():
+                raise ValidationError('Рецепт уже есть в списке покупок')
+        return attrs

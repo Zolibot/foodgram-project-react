@@ -29,16 +29,19 @@ class User(AbstractUser):
         verbose_name='Тип учётной записи',
     )
 
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-        ordering = ['username']
-
     @property
     def is_admin(self):
         return self.role == Role.ADMIN or self.is_superuser
 
     is_admin.fget.short_description = 'Админ'
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ['username']
+
+    def __str__(self):
+        return self.username
 
 
 class Follow(models.Model):
@@ -56,9 +59,13 @@ class Follow(models.Model):
     )
 
     class Meta:
+        ordering = ['-user_id']
         unique_together = ['user', 'following']
         models.UniqueConstraint(
             fields=['user', 'following'], name='follow_user'
         )
         verbose_name_plural = 'Подписки'
         verbose_name = 'Подписка'
+
+    def __str__(self):
+        return f'{self.user} подписался на {self.following}'

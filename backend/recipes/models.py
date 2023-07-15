@@ -1,4 +1,9 @@
-from django.core.validators import MinValueValidator, RegexValidator
+from django.conf import settings
+from django.core.validators import (
+    MaxValueValidator,
+    MinValueValidator,
+    RegexValidator,
+)
 from django.db import models
 
 from users.models import User
@@ -19,6 +24,7 @@ class Ingredient(models.Model):
     )
 
     class Meta:
+        ordering = ['-id']
         verbose_name = 'Ингридиент'
         verbose_name_plural = 'Ингридиенты'
 
@@ -48,6 +54,7 @@ class Tag(models.Model):
     )
 
     class Meta:
+        ordering = ['-id']
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
 
@@ -62,14 +69,12 @@ class Recipes(models.Model):
         help_text='Автор рецепта',
         on_delete=models.CASCADE,
         related_name='recipes',
-        null=False,
         blank=False,
     )
     name = models.CharField(
         verbose_name='Название',
         help_text='Название рецепта',
         max_length=200,
-        null=False,
         blank=False,
         db_index=True,
     )
@@ -77,13 +82,11 @@ class Recipes(models.Model):
         verbose_name='Фото',
         help_text='Фото рецепта',
         upload_to='food/',
-        null=False,
         blank=False,
     )
     text = models.TextField(
         verbose_name='Описание',
         help_text='Описание рецепта',
-        null=False,
         blank=False,
     )
     tags = models.ManyToManyField(
@@ -98,12 +101,14 @@ class Recipes(models.Model):
         through='IngredientAmount',
         blank=False,
     )
-    cooking_time = models.IntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время',
         help_text='Время приготовления в минутах',
-        null=False,
         blank=False,
-        validators=[MinValueValidator(1)],
+        validators=[
+            MinValueValidator(settings.MIN_VALUE),
+            MaxValueValidator(settings.MAX_VALUE),
+        ],
     )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации рецепта',
@@ -115,12 +120,6 @@ class Recipes(models.Model):
         ordering = ['-pub_date']
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-        constraints = [
-            models.constraints.CheckConstraint(
-                check=models.Q(cooking_time__gte=1),
-                name='cooking_time_positive',
-            )
-        ]
 
     def __str__(self):
         return self.name
@@ -139,13 +138,17 @@ class IngredientAmount(models.Model):
         related_name='recipe',
         on_delete=models.CASCADE,
     )
-    amount = models.IntegerField(
+    amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
         help_text='Количество ингредиента',
-        validators=[MinValueValidator(1)],
+        validators=[
+            MinValueValidator(settings.MIN_VALUE),
+            MaxValueValidator(settings.MAX_VALUE),
+        ],
     )
 
     class Meta:
+        ordering = ['-id']
         verbose_name = 'Количество ингредиентов'
         verbose_name_plural = 'Количество ингредиентов'
         constraints = [
@@ -153,10 +156,10 @@ class IngredientAmount(models.Model):
                 fields=['recipe', 'ingredient'],
                 name='unique_ingredient',
             ),
-            models.constraints.CheckConstraint(
-                check=models.Q(amount__gte=1), name='amount_positive'
-            ),
         ]
+
+    def __str__(self):
+        return self.ingredient
 
 
 class FavoriteRecipes(models.Model):
@@ -175,6 +178,7 @@ class FavoriteRecipes(models.Model):
     )
 
     class Meta:
+        ordering = ['-id']
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные рецепты'
         constraints = [
@@ -183,6 +187,9 @@ class FavoriteRecipes(models.Model):
                 name='favorite_recipe',
             )
         ]
+
+    def __str__(self):
+        return f'{self.user} добавил в избранное  - {self.recipe}'
 
 
 class ShoppingCart(models.Model):
@@ -201,6 +208,7 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
+        ordering = ['-id']
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
         constraints = [
@@ -209,3 +217,6 @@ class ShoppingCart(models.Model):
                 name='shopping_cart_recipe',
             )
         ]
+
+    def __str__(self):
+        return f'{self.user} добавил в список покупок - {self.recipe}'

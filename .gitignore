@@ -9,7 +9,6 @@ __pycache__/
 .vscode
 .http
 .vscode/
-migrations/
 *.sh
 food/
 *.bak
