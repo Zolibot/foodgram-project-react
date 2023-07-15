@@ -84,7 +84,8 @@ class FollowSerializer(ModelSerializer):
 
     def get_recipes(self, obj):
         request = self.context.get('request')
-        queryset = Recipes.objects.filter(author=self.context.get('author'))
+        author = obj.following
+        queryset = Recipes.objects.filter(author=author)
         if 'recipes_limit' in request.query_params:
             queryset = queryset[: int(request.query_params['recipes_limit'])]
         serializer = FavoriteSerializer(
